@@ -5,16 +5,18 @@ public class ResourceManager
     private readonly Dictionary<object, object> _resourcesToAcquire = new();
     private readonly List<object> _acquiredResources = new();
     private readonly object _lockObject = new();
-    private const int DefaultMaxAttempts = 100; 
+    private const int DefaultMaxAttempts = 100;
+    private const int DefaultTimeoutMs = 5000;
     
     public bool TryLock(
         object resource, 
         int maxAttempts = DefaultMaxAttempts, 
-        int timeout = Timeout.Infinite)
+        int timeout = DefaultTimeoutMs)
     {
         var attempts = 0;
         var backoffExponent = 1;
         var random = new Random();
+        timeout += random.Next(100);
         var requiredResources = new Queue<object>(new []{ resource });
         
         while (attempts < maxAttempts)
@@ -34,7 +36,7 @@ public class ResourceManager
 
                 // Calculate backoff and jitter
                 int backoffMs = (int)(Math.Pow(2, backoffExponent) * 10);
-                int jitterMs = random.Next(0, 10);
+                int jitterMs = random.Next(10);
                 Thread.Sleep(backoffMs + jitterMs);
 
                 backoffExponent++;
@@ -61,7 +63,7 @@ public class ResourceManager
         }
     }
     
-    private bool TryAcquireResource(object resource, int timeout = Timeout.Infinite)
+    private bool TryAcquireResource(object resource, int timeout)
     {
         // add this additional request to our total set of required resources
         if (!_resourcesToAcquire.TryGetValue(resource, out var resourceLock))

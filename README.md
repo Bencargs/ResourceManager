@@ -1,7 +1,7 @@
 # ResourceManager Library
 
 <p align="center">
-  <img width="460" height="300" src="logo.png">
+  <img width="256" height="256" src="logo.png">
 </p>
 
 ## Overview
